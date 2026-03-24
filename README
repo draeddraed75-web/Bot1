@@ -1,0 +1,193 @@
+# سُراد | Sorad — منصة البث المرئي العربية
+
+## نظرة عامة | Overview
+
+**سُراد (Sorad)** هي منصة بث مرئي عربية متكاملة، تُقدّم أفلاماً ومسلسلات عربية بجودة عالية مع دعم HLS وتقنيات التكيف التلقائي للشبكة.
+
+**Sorad** is a full Arabic video streaming platform featuring HLS playback, bilingual (Arabic/English) support, subscription model, and adaptive bitrate streaming.
+
+---
+
+## بيانات الاختبار | Test Credentials
+
+### المدير (Admin)
+- **البريد الإلكتروني / Email**: `admin@sorad.tv`
+- **كلمة المرور / Password**: `Admin@123`
+- **الصلاحيات**: وصول كامل لوحة الإدارة
+
+### المستخدم التجريبي (Subscriber)
+- **البريد الإلكتروني / Email**: `test@sorad.tv`
+- **كلمة المرور / Password**: `Test@123`
+- **الاشتراك**: مفعّل (يمكن مشاهدة المحتوى المميز)
+
+---
+
+## تشغيل المشروع | Running the Project
+
+### البيئة المتطلبة | Requirements
+- Node.js 18+
+- pnpm 8+
+- PostgreSQL (مُدمج مع Replit)
+
+### التشغيل على Replit
+المشروع يعمل تلقائياً عند فتحه في Replit. يبدأ الخادم والعميل معاً.
+
+### التشغيل المحلي | Local Setup
+```bash
+# نسخ متغيرات البيئة
+cp .env.example .env
+# تعديل .env بالقيم الصحيحة
+
+# تثبيت الحزم
+pnpm install
+
+# تشغيل الخادم (المنفذ 3000)
+pnpm --filter @workspace/api-server run dev
+
+# تشغيل العميل الويب (المنفذ 5173)
+pnpm --filter @workspace/sorad-web run dev
+```
+
+---
+
+## المحتوى المُحمّل مسبقاً | Pre-loaded Content
+
+| العنوان | النوع | مميز | رابط HLS |
+|---------|-------|------|----------|
+| رحلة عبر الصحراء | فيلم | لا | test-streams.mux.dev |
+| ليالي بغداد | مسلسل | **نعم** | longtailvideo.com |
+| أسرار البحر الأحمر | فيلم | لا | bitdash-a.akamaihd.net |
+
+---
+
+## اختبار HLS على شبكات بطيئة | HLS Testing on Slow Networks
+
+### في المتصفح (Chrome DevTools)
+1. افتح DevTools → Network → Throttling
+2. اختر: "Slow 3G" أو "Offline"
+3. ابدأ تشغيل الفيديو وراقب تكيّف الجودة
+
+### صفحة اختبار الشبكة
+انتقل إلى `/network-test` لمحاكاة سرعات الشبكة المختلفة.
+
+### الخيارات المتاحة في صفحة الاختبار
+- **ممتاز (10 Mbps)**: جودة عالية
+- **متوسط (1 Mbps)**: جودة متوسطة
+- **ضعيف (200 kbps)**: جودة منخفضة
+- **غير متصل**: يُظهر رسالة عدم الاتصال
+
+---
+
+## البنية التقنية | Technical Architecture
+
+```
+workspace/
+├── artifacts/
+│   ├── api-server/     # خادم Express + PostgreSQL
+│   └── sorad-web/      # واجهة React + Vite
+├── lib/
+│   ├── api-spec/       # OpenAPI 3.1 spec
+│   ├── api-client-react/ # React Query hooks (مُولَّد)
+│   └── api-zod/        # Zod schemas (مُولَّد)
+└── .env.example        # مثال متغيرات البيئة
+```
+
+### نقاط API الرئيسية | Main API Endpoints
+
+| المسار | الطريقة | الوصف |
+|--------|---------|-------|
+| `/api/auth/register` | POST | تسجيل مستخدم جديد |
+| `/api/auth/login` | POST | تسجيل الدخول |
+| `/api/auth/profile` | GET/PUT | إدارة الملف الشخصي |
+| `/api/content` | GET | قائمة المحتوى (مع بحث وفلترة) |
+| `/api/content/:id` | GET | تفاصيل المحتوى |
+| `/api/content` | POST | إنشاء محتوى (مدير فقط) |
+| `/api/content/:id` | PUT/DELETE | تعديل/حذف (مدير فقط) |
+| `/api/stream-token` | POST | رمز بث مؤقت |
+| `/api/payments` | POST | دفع واشتراك (محاكاة) |
+| `/api/analytics/events` | POST | تسجيل حدث تحليلي |
+| `/api/analytics` | GET | بيانات التحليلات (مدير) |
+
+---
+
+## الشاشات والصفحات | Pages
+
+- **`/`** — الصفحة الرئيسية: مكتبة المحتوى مع بحث
+- **`/content/:id`** — تفاصيل المحتوى
+- **`/player/:id`** — مشغل HLS
+- **`/login`** — تسجيل الدخول
+- **`/register`** — إنشاء حساب
+- **`/profile`** — الملف الشخصي وتفضيل اللغة
+- **`/admin`** — لوحة إدارة المحتوى (مدير فقط)
+- **`/admin/analytics`** — التحليلات (مدير فقط)
+- **`/admin/content/new`** — إضافة محتوى جديد
+- **`/admin/content/:id/edit`** — تعديل محتوى
+- **`/network-test`** — اختبار الشبكة
+- **`/search`** — نتائج البحث
+
+---
+
+## الأمان والخصوصية | Security & Privacy
+
+### ملاحظة الخصوصية (عربي)
+تلتزم سُراد بحماية بيانات المستخدمين. يُخزَّن البريد الإلكتروني وكلمة المرور المُشفَّرة فقط. لا تُشارَك البيانات مع أطراف ثالثة. محتوى المنصة خاضع لترخيص ومحمي بموجب قوانين الملكية الفكرية.
+
+### Privacy Note (English)
+Sorad is committed to protecting user data. Only email and encrypted passwords are stored. Data is not shared with third parties. All platform content is licensed and protected by intellectual property laws.
+
+---
+
+## TODO: متطلبات الإنتاج | Production Requirements
+
+### نظام البث | Streaming
+- [ ] **CDN**: استبدل روابط HLS التجريبية بـ Amazon CloudFront
+- [ ] **Signed URLs**: تطبيق CloudFront Signed URLs بدلاً من الرموز المحاكاة
+- [ ] **DRM**: ربط Widevine (Android/Chrome) أو PlayReady (Windows) أو FairPlay (iOS/Safari)
+- [ ] **Transcoding**: استخدم AWS Elemental MediaConvert أو Mux للتحويل التلقائي
+
+### الدفع | Payments
+- [ ] **Stripe**: ربط Stripe Payments وWebhooks
+- [ ] **البوابات العربية**: HyperPay, PayTabs, Tap Payments, Paymob
+- [ ] **VAT**: إضافة ضريبة القيمة المضافة للفواتير
+
+### التنزيل والاستخدام دون إنترنت | Offline
+- [ ] **Offline DRM**: تنزيل مشفر باستخدام Widevine Offline
+- [ ] **AsyncStorage**: تخزين آمن للمحتوى المحمّل
+
+### البنية التحتية | Infrastructure
+- [ ] **حدود المعدل**: Redis-based rate limiting عوضاً عن الذاكرة
+- [ ] **قاعدة البيانات**: ترحيل إلى PostgreSQL مدارة (AWS RDS, PlanetScale)
+- [ ] **المراقبة**: Sentry للأخطاء، Datadog للأداء
+
+---
+
+## خارطة طريق 6 أسابيع | 6-Week Production Roadmap
+
+| الأسبوع | المهام |
+|---------|--------|
+| 1 | ربط CDN حقيقي + Signed URLs + اختبار HLS |
+| 2 | تكامل DRM (Widevine/FairPlay) + اختبار شامل |
+| 3 | بوابة دفع حقيقية (Stripe أو HyperPay) + Webhooks |
+| 4 | تطبيق Expo للجوال + اختبار iOS/Android |
+| 5 | مراقبة الأداء + تحسين CDN + اختبار الحمل |
+| 6 | إطلاق Beta + مراجعة أمنية + تحسين SEO |
+
+---
+
+## الشعار والعلامة التجارية | Logo & Branding
+
+الشعار المستخدم في هذه المنصة تم توليده بواسطة الذكاء الاصطناعي للأغراض التطويرية. في الإنتاج، يجب:
+- استخدام شعار مصمم احترافياً بصيغة SVG وPNG
+- الحصول على حقوق التصميم الكاملة
+- ضمان عمل الشعار على الخلفيات الداكنة والفاتحة
+
+The logo used in this platform was AI-generated for development purposes. For production:
+- Use a professionally designed logo in SVG and PNG formats
+- Obtain full design rights
+- Ensure the logo works on dark and light backgrounds
+
+---
+
+## الدعم الفني | Support
+
+للإبلاغ عن مشكلة أو طلب ميزة، يرجى التواصل مع فريق التطوير.

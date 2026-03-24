@@ -1,0 +1,98 @@
+# سُراد | Sorad — Streaming Platform Workspace
+
+## Overview
+
+pnpm workspace monorepo — Arabic video streaming platform (سُراد / Sorad).
+
+## Stack
+
+- **Monorepo tool**: pnpm workspaces
+- **Node.js version**: 24
+- **Package manager**: pnpm
+- **TypeScript version**: 5.9
+- **API framework**: Express 5
+- **Database**: PostgreSQL (Replit built-in) with raw pg queries
+- **Validation**: Zod (`zod/v4`), `drizzle-zod`
+- **API codegen**: Orval (from OpenAPI spec)
+- **Build**: esbuild (CJS bundle)
+- **Auth**: JWT + bcryptjs
+- **Frontend**: React 18 + Vite + Tailwind CSS + shadcn/ui
+- **Video**: hls.js for HLS playback
+- **i18n**: i18next + react-i18next (Arabic RTL primary, English secondary)
+- **Fonts**: Cairo (Arabic glyph support)
+
+## Platform Features
+
+- Full HLS adaptive bitrate streaming with hls.js
+- JWT authentication with bcryptjs password hashing
+- Bilingual Arabic/English UI with RTL support
+- Premium content subscription model
+- Stream token generation (simulated signed URLs)
+- Admin panel: full content CRUD
+- Network resilience: quality adaptation based on connection
+- Analytics events tracking (play_start, buffering, quality_switch, etc.)
+- Service Worker for HLS manifest caching
+- Rate limiting on auth and stream-token endpoints
+
+## Structure
+
+```text
+workspace/
+├── artifacts/
+│   ├── api-server/      # Express API server (PORT assigned by Replit)
+│   └── sorad-web/       # React + Vite web client (preview at /)
+├── lib/
+│   ├── api-spec/        # OpenAPI 3.1 spec + Orval codegen config
+│   ├── api-client-react/ # Generated React Query hooks
+│   ├── api-zod/         # Generated Zod schemas
+│   └── db/              # Drizzle schema (not heavily used; API uses raw pg)
+├── .env.example         # Environment variable template
+└── README.md            # Full docs with test credentials
+```
+
+## Test Credentials
+
+- **Admin**: admin@sorad.tv / Admin@123 (isAdmin=true, isSubscribed=true)
+- **Test User**: test@sorad.tv / Test@123 (isSubscribed=true)
+
+## Database Tables
+
+- `users` — email, password_hash, name, is_admin, is_subscribed, language
+- `content` — title (ar+en), description (ar+en), hls_url, hls_variants (JSONB), tags, languages, region_tags, subtitles, is_premium, network_quality_hint, duration, type
+- `stream_tokens` — temp tokens for content playback
+- `analytics_events` — playback event tracking
+- `payments` — mock payment records
+
+## Key API Routes
+
+- `POST /api/auth/register` — register
+- `POST /api/auth/login` — login → returns JWT
+- `GET/PUT /api/auth/profile` — user profile + language pref
+- `GET /api/content` — list (supports ?q=, ?lang=, ?region=, ?page=, ?limit=)
+- `GET /api/content/:id` — detail
+- `POST/PUT/DELETE /api/content/:id` — admin CRUD
+- `POST /api/stream-token` — get HLS playback URL (checks subscription for premium)
+- `POST /api/payments` — mock subscription payment
+- `POST /api/analytics/events` — record playback event
+- `GET /api/analytics` — admin analytics view
+
+## Frontend Pages
+
+- `/` — Home/Library with hero + content grid
+- `/content/:id` — Content detail with Play button
+- `/player/:id` — HLS player with controls
+- `/login`, `/register` — Auth pages
+- `/profile` — Language preference, subscription status
+- `/admin` — Admin content list (admin only)
+- `/admin/content/new`, `/admin/content/:id/edit` — Content editor
+- `/admin/analytics` — Analytics table
+- `/network-test` — Network simulation page
+- `/search` — Search results
+
+## TODO: Production Requirements
+
+- Replace simulated stream signing with CloudFront/S3 signed URLs
+- Integrate DRM (Widevine/PlayReady/FairPlay)
+- Real payment gateway (Stripe, HyperPay, PayTabs)
+- Secure offline downloads with encrypted storage
+- Redis-based rate limiting
